@@ -1,20 +1,26 @@
 const apiKey = '1';
-const apiUrl = 'https://www.themealdb.com/api/json/v1/' + apiKey;
+const apiUrl = `https://www.themealdb.com/api/json/v1/${apiKey}`;
+
+// Cache frequently accessed DOM elements
+const mealNameInput = document.getElementById('mealName');
+const firstLetterInput = document.getElementById('firstLetter');
+const mealIdInput = document.getElementById('mealId');
+const outputDiv = document.getElementById('output');
 
 function searchByName() {
-    const mealName = document.getElementById('mealName').value;
+    const mealName = mealNameInput.value;
     const url = `${apiUrl}/search.php?s=${mealName}`;
     fetchUrl(url);
 }
 
 function listByFirstLetter() {
-    const firstLetter = document.getElementById('firstLetter').value;
+    const firstLetter = firstLetterInput.value;
     const url = `${apiUrl}/search.php?f=${firstLetter}`;
     fetchUrl(url);
 }
 
 function lookupById() {
-    const mealId = document.getElementById('mealId').value;
+    const mealId = mealIdInput.value;
     const url = `${apiUrl}/lookup.php?i=${mealId}`;
     fetchUrl(url);
 }
@@ -24,43 +30,48 @@ function listAllMealCategory() {
     fetchCategories(url);
 }
 
-function fetchUrl(url) {
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
+async function fetchUrl(url) {
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
             displayResults(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        } else {
+            throw new Error('Network response was not OK.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        outputDiv.textContent = 'An error occurred while fetching data.';
+    }
 }
 
-function fetchCategories(url) {
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
+async function fetchCategories(url) {
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
             displayCategories(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        } else {
+            throw new Error('Network response was not OK.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        outputDiv.textContent = 'An error occurred while fetching categories.';
+    }
 }
 
 function displayResults(data) {
-    const outputDiv = document.getElementById('output');
     outputDiv.innerHTML = '';
 
     if (data.meals) {
         data.meals.forEach(meal => {
-            const mealName = meal.strMeal;
-            const mealId = meal.idMeal;
-            const mealImage = meal.strMealThumb;
+            const { strMeal, idMeal, strMealThumb } = meal;
 
             const mealDiv = document.createElement('div');
             mealDiv.innerHTML = `
-        <h3>${mealName}</h3>
-        <p>Meal ID: ${mealId}</p>
-        <img src="${mealImage}" alt="${mealName}" width="200" height="150" />
+        <h3>${strMeal}</h3>
+        <p>Meal ID: ${idMeal}</p>
+        <img src="${strMealThumb}" alt="${strMeal}" width="200" height="150" />
       `;
 
             outputDiv.appendChild(mealDiv);
@@ -71,7 +82,6 @@ function displayResults(data) {
 }
 
 function displayCategories(data) {
-    const outputDiv = document.getElementById('output');
     outputDiv.innerHTML = '';
 
     const title = document.createElement('h2');
@@ -80,17 +90,17 @@ function displayCategories(data) {
 
     if (data.categories) {
         data.categories.forEach(category => {
-            const categoryName = category.strCategory;
-            const categoryImage = category.strCategoryThumb;
+            const { strCategory, strCategoryThumb } = category;
 
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'col bg-info m-3';
             categoryDiv.innerHTML = `
-            <div class=''>
-              <h3>${categoryName}</h3>
-              <img src="${categoryImage}" alt="${categoryName}" />
-            </div>
-            `;
+        <div class=''>
+          <h3>${strCategory}</h3>
+          <img src="${strCategoryThumb}" alt="${strCategory}" />
+          <button onclick="addToCart('${strCategory}')">Add to Cart</button>
+        </div>
+      `;
 
             outputDiv.appendChild(categoryDiv);
         });
@@ -99,3 +109,22 @@ function displayCategories(data) {
     }
 }
 
+function addToCart(categoryName) {
+    try {
+        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+        const existingItem = cartItems.find(item => item.categoryName === categoryName);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cartItems.push({ categoryName, quantity: 1 });
+        }
+
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+
+        alert('Meal added to cart!');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while adding the meal to the cart.');
+    }
+}

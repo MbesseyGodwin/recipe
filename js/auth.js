@@ -1,5 +1,5 @@
 // Timeout duration in milliseconds (e.g., 5 minutes)
-const timeoutDuration = 5 * 60 * 1000; // 5 minutes
+const timeoutDuration = 60 * 60 * 1000; //  1 hours
 
 let timeoutId;
 
