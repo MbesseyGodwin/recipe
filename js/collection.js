@@ -1,15 +1,11 @@
-// Code for managing user's meal collections
-
-// Cache frequently accessed DOM elements
 const cartItemsDiv = document.getElementById('cartItems');
+const feedbackStorageKey = 'feedback';
 
-// Retrieve cart items from local storage
 function getCartItems() {
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     return cartItems;
 }
 
-// Display cart items
 function displayCartItems() {
     cartItemsDiv.innerHTML = '';
 
@@ -19,43 +15,18 @@ function displayCartItems() {
         return;
     }
 
-    const feedback = JSON.parse(localStorage.getItem('feedback')) || {};
+    const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
 
     cartItems.forEach(item => {
         const { categoryName, quantity } = item;
 
-        const cartItemDiv = document.createElement('div');
-        cartItemDiv.className = 'cart-item';
-        cartItemDiv.innerHTML = `
-        <h3>${categoryName}</h3>
-        <p>Quantity: ${quantity}</p>
-        <textarea class="comment-input" placeholder="Add comment"></textarea>
-        <select class="rating-input">
-          <option value="">Select rating</option>
-          <option value="1">1 star</option>
-          <option value="2">2 stars</option>
-          <option value="3">3 stars</option>
-          <option value="4">4 stars</option>
-          <option value="5">5 stars</option>
-        </select>
-        <button class="submit-btn" onclick="submitFeedback('${categoryName}')">Submit</button>
-      `;
+        const cartItemDiv = createCartItemElement(categoryName, quantity);
+        const { commentInput, ratingInput } = preFillFeedback(categoryName, cartItemDiv);
 
-        // Pre-fill feedback if available
-        const commentInput = cartItemDiv.querySelector('.comment-input');
-        const ratingInput = cartItemDiv.querySelector('.rating-input');
-        preFillFeedback(categoryName, commentInput, ratingInput);
-
-        // Display existing feedback
         const itemFeedback = feedback[categoryName];
         if (itemFeedback) {
             const { comment, rating, dateSubmitted } = itemFeedback;
-            const feedbackDiv = document.createElement('div');
-            feedbackDiv.innerHTML = `
-          <p>Comment: ${comment}</p>
-          <p>Rating: ${rating} stars</p>
-          <p>date: ${dateSubmitted}</p>
-        `;
+            const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
             cartItemDiv.appendChild(feedbackDiv);
         }
 
@@ -63,70 +34,123 @@ function displayCartItems() {
     });
 }
 
-
-// Submit feedback for a cart item
-// Submit feedback for a cart item
-function submitFeedback(categoryName) {
-    const cartItems = document.getElementsByClassName('cart-item');
-
-    for (let i = 0; i < cartItems.length; i++) {
-        const cartItem = cartItems[i];
-        const itemName = cartItem.querySelector('h3').textContent;
-
-        if (itemName === categoryName) {
-            const commentInput = cartItem.querySelector('.comment-input');
-            const ratingInput = cartItem.querySelector('.rating-input');
-
-            const comment = commentInput.value.trim();
-            const rating = ratingInput.value;
-            const date = new Date();
-            const dateSubmitted = date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-
-            console.log(`Date and Time: ${formattedDateTime}`);
-
-
-            // Perform validation if needed
-            if (comment === '' || rating === '') {
-                alert('Please provide a comment and rating.');
-                return;
-            }
-
-            // Get existing feedback from localStorage
-            let feedback = JSON.parse(localStorage.getItem('feedback')) || {};
-
-            // Update feedback object with new comment and rating
-            feedback[categoryName] = { comment, rating, dateSubmitted };
-
-            // Save updated feedback in localStorage
-            localStorage.setItem('feedback', JSON.stringify(feedback));
-
-            // Clear the input fields
-            commentInput.value = '';
-            ratingInput.value = '';
-
-            // Provide visual feedback to the user
-            alert('Feedback submitted!');
-            return;
-        }
-    }
-
-    alert('Cart item not found.');
+function createCartItemElement(categoryName, quantity) {
+    const cartItemDiv = document.createElement('div');
+    cartItemDiv.className = 'col-4 cart-item';
+    cartItemDiv.innerHTML = `
+      <div class="p-3" data-aos="fade-up" data-aos-delay="200">
+          <div class="icon-box shadow d-flex flex-column justify-content-center align-items-center">
+              <h3>${categoryName}</h3>
+              <p>Quantity: ${quantity}</p>
+              
+              <button class="btn btn-dark view-comments" data-category="${categoryName}" type="button" data-toggle="modal" data-target="#commentsModal-${categoryName}">View Comments</button>
+              <textarea class="comment-input form-control" placeholder="Add comment"></textarea>
+              <select class="rating-input form-control">
+                  <option value="">Select rating</option>
+                  <option value="1">1 star</option>
+                  <option value="2">2 stars</option>
+                  <option value="3">3 stars</option>
+                  <option value="4">4 stars</option>
+                  <option value="5">5 stars</option>
+              </select>
+              <button class="submit-btn btn-primary" onclick="submitFeedback('${categoryName}')">Submit</button>
+          </div>
+      </div>
+    `;
+    return cartItemDiv;
 }
 
-function preFillFeedback(categoryName, commentInput, ratingInput) {
-    const feedback = JSON.parse(localStorage.getItem('feedback')) || {};
+function createCommentsModal(categoryName) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = `commentsModal-${categoryName}`;
+    modal.innerHTML = `
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">${categoryName} Comments</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="commentsList-${categoryName}"></div>
+        </div>
+      </div>
+    </div>
+  `;
+    document.body.appendChild(modal);
+}
+
+function createFeedbackElement(comment, rating, dateSubmitted) {
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.innerHTML = `
+    <p>Comment: ${comment}</p>
+    <p>Rating: ${rating} stars</p>
+    <p>Date: ${dateSubmitted}</p>
+  `;
+    return feedbackDiv;
+}
+
+function submitFeedback(categoryName) {
+    const cartItems = Array.from(document.querySelectorAll('.cart-item'));
+    const cartItem = cartItems.find(item => item.querySelector('h3').textContent === categoryName);
+
+    if (!cartItem) {
+        alert('Cart item not found.');
+        return;
+    }
+
+    const commentInput = cartItem.querySelector('.comment-input');
+    const ratingInput = cartItem.querySelector('.rating-input');
+
+    const comment = commentInput.value.trim();
+    const rating = ratingInput.value;
+
+    if (comment === '' || rating === '') {
+        alert('Please provide a comment and rating.');
+        return;
+    }
+
+    const date = new Date();
+    const dateSubmitted = date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+    const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
+    feedback[categoryName] = { comment, rating, dateSubmitted };
+
+    localStorage.setItem(feedbackStorageKey, JSON.stringify(feedback));
+
+    commentInput.value = '';
+    ratingInput.value = '';
+
+    alert('Feedback submitted!');
+    updateFeedbackElement(categoryName, comment, rating, dateSubmitted);
+}
+
+function preFillFeedback(categoryName, cartItemDiv) {
+    const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
     const itemFeedback = feedback[categoryName];
+    const commentInput = cartItemDiv.querySelector('.comment-input');
+    const ratingInput = cartItemDiv.querySelector('.rating-input');
 
     if (itemFeedback) {
         commentInput.value = itemFeedback.comment;
         ratingInput.value = itemFeedback.rating;
     }
+
+    return { commentInput, ratingInput };
 }
 
+function updateFeedbackElement(categoryName, comment, rating, dateSubmitted) {
+    const cartItems = Array.from(document.querySelectorAll('.cart-item'));
+    const cartItem = cartItems.find(item => item.querySelector('h3').textContent === categoryName);
 
+    if (cartItem) {
+        const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
+        cartItem.appendChild(feedbackDiv);
+    }
+}
 
-// Call the displayCartItems function when the page loads
 window.addEventListener('load', function () {
     displayCartItems();
-    preFillFeedback();
 });

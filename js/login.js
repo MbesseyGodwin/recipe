@@ -23,7 +23,7 @@ function loginUser(email, password) {
             localStorage.setItem('isLoggedIn', true);
 
             // Redirect the user to the profile page
-            window.location.href = 'profile.html';
+            window.location.href = '../../protected/profile/profile.html';
             return;
         }
     }

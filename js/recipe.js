@@ -4,7 +4,7 @@ const apiUrl = `https://www.themealdb.com/api/json/v1/${apiKey}`;
 // Cache frequently accessed DOM elements
 const mealNameInput = document.getElementById('mealName');
 const firstLetterInput = document.getElementById('firstLetter');
-const mealIdInput = document.getElementById('mealId');
+// const mealIdInput = document.getElementById('mealId');
 const outputDiv = document.getElementById('output');
 
 function searchByName() {
@@ -19,11 +19,11 @@ function listByFirstLetter() {
     fetchUrl(url);
 }
 
-function lookupById() {
-    const mealId = mealIdInput.value;
-    const url = `${apiUrl}/lookup.php?i=${mealId}`;
-    fetchUrl(url);
-}
+// function lookupById() {
+//     const mealId = mealIdInput.value;
+//     const url = `${apiUrl}/lookup.php?i=${mealId}`;
+//     fetchUrl(url);
+// }
 
 function listAllMealCategory() {
     const url = `${apiUrl}/categories.php`;
@@ -98,7 +98,7 @@ function displayCategories(data) {
         <div class=''>
           <h3>${strCategory}</h3>
           <img src="${strCategoryThumb}" alt="${strCategory}" />
-          <button onclick="addToCart('${strCategory}')">Add to Cart</button>
+          <button onclick="addToCollection('${strCategory}')">Add to Collection</button>
         </div>
       `;
 
@@ -109,22 +109,22 @@ function displayCategories(data) {
     }
 }
 
-function addToCart(categoryName) {
+function addToCollection(categoryName) {
     try {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+        const collectionItems = JSON.parse(localStorage.getItem('collectionItems')) || [];
 
-        const existingItem = cartItems.find(item => item.categoryName === categoryName);
+        const existingItem = collectionItems.find(item => item.categoryName === categoryName);
         if (existingItem) {
             existingItem.quantity++;
         } else {
-            cartItems.push({ categoryName, quantity: 1 });
+            collectionItems.push({ categoryName, quantity: 1 });
         }
 
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        localStorage.setItem('collectionItems', JSON.stringify(collectionItems));
 
-        alert('Meal added to cart!');
+        alert('Meal added to collection!');
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred while adding the meal to the cart.');
+        alert('An error occurred while adding the meal to the collection.');
     }
 }

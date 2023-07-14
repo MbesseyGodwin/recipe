@@ -9,7 +9,7 @@ function checkLogin() {
 
     // If the user is not logged in, redirect to the login page
     if (!isLoggedIn) {
-        window.location.href = 'login.html';
+        window.location.href = '../../protected/login/login.html';
     } else {
         // Start the inactivity timer
         startInactivityTimer();
@@ -22,7 +22,7 @@ function logout() {
     localStorage.removeItem('isLoggedIn');
 
     // Redirect the user to the login page
-    window.location.href = 'login.html';
+    window.location.href = '../../protected/login/login.html';
 
     // Clear the inactivity timer
     clearTimeout(timeoutId);
