@@ -1,26 +1,28 @@
+// collection.js file
 const cartItemsDiv = document.getElementById('cartItems');
 const feedbackStorageKey = 'feedback';
+const collectionItemsStorageKey = 'collectionItems';
 
-function getCartItems() {
-    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    return cartItems;
+function getCollectionItems() {
+    const collectionItems = JSON.parse(localStorage.getItem(collectionItemsStorageKey)) || [];
+    return collectionItems;
 }
 
-function displayCartItems() {
+function displayCollectionItems() {
     cartItemsDiv.innerHTML = '';
 
-    const cartItems = getCartItems();
-    if (cartItems.length === 0) {
-        cartItemsDiv.textContent = 'Cart is empty.';
+    const collectionItems = getCollectionItems();
+    if (collectionItems.length === 0) {
+        cartItemsDiv.textContent = 'Collection is empty.';
         return;
     }
 
     const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
 
-    cartItems.forEach(item => {
-        const { categoryName, quantity } = item;
+    collectionItems.forEach(item => {
+        const { categoryName, mealName, mealImage } = item;
 
-        const cartItemDiv = createCartItemElement(categoryName, quantity);
+        const cartItemDiv = createCartItemElement(categoryName, mealName, mealImage);
         const { commentInput, ratingInput } = preFillFeedback(categoryName, cartItemDiv);
 
         const itemFeedback = feedback[categoryName];
@@ -34,16 +36,18 @@ function displayCartItems() {
     });
 }
 
-function createCartItemElement(categoryName, quantity) {
+function createCartItemElement(categoryName, mealName, mealImage) {
+
     const cartItemDiv = document.createElement('div');
     cartItemDiv.className = 'col-4 cart-item';
     cartItemDiv.innerHTML = `
       <div class="p-3" data-aos="fade-up" data-aos-delay="200">
           <div class="icon-box shadow d-flex flex-column justify-content-center align-items-center">
               <h3>${categoryName}</h3>
-              <p>Quantity: ${quantity}</p>
-              
-              <button class="btn btn-dark view-comments" data-category="${categoryName}" type="button" data-toggle="modal" data-target="#commentsModal-${categoryName}">View Comments</button>
+              <h4>${mealName}</h4>
+              <div class="meal-img">
+                <img class="w-50 mb-2" src="${mealImage}" alt="food">
+              </div>
               <textarea class="comment-input form-control" placeholder="Add comment"></textarea>
               <select class="rating-input form-control">
                   <option value="">Select rating</option>
@@ -53,34 +57,34 @@ function createCartItemElement(categoryName, quantity) {
                   <option value="4">4 stars</option>
                   <option value="5">5 stars</option>
               </select>
-              <button class="submit-btn btn-primary" onclick="submitFeedback('${categoryName}')">Submit</button>
+              <button class="btn btn-primary" onclick="submitFeedback('${mealName}')">Submit</button>
           </div>
       </div>
     `;
     return cartItemDiv;
 }
 
-function createCommentsModal(categoryName) {
-    const modal = document.createElement('div');
-    modal.className = 'modal fade';
-    modal.id = `commentsModal-${categoryName}`;
-    modal.innerHTML = `
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">${categoryName} Comments</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div id="commentsList-${categoryName}"></div>
-        </div>
-      </div>
-    </div>
-  `;
-    document.body.appendChild(modal);
-}
+// function createCommentsModal(categoryName) {
+//     const modal = document.createElement('div');
+//     modal.className = 'modal fade';
+//     modal.id = `commentsModal-${categoryName}`;
+//     modal.innerHTML = `
+//     <div class="modal-dialog">
+//       <div class="modal-content">
+//         <div class="modal-header">
+//           <h5 class="modal-title">${categoryName} Comments</h5>
+//           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+//             <span aria-hidden="true">&times;</span>
+//           </button>
+//         </div>
+//         <div class="modal-body">
+//           <div id="commentsList-${categoryName}"></div>
+//         </div>
+//       </div>
+//     </div>
+//   `;
+//     document.body.appendChild(modal);
+// }
 
 function createFeedbackElement(comment, rating, dateSubmitted) {
     const feedbackDiv = document.createElement('div');
@@ -94,7 +98,7 @@ function createFeedbackElement(comment, rating, dateSubmitted) {
 
 function submitFeedback(categoryName) {
     const cartItems = Array.from(document.querySelectorAll('.cart-item'));
-    const cartItem = cartItems.find(item => item.querySelector('h3').textContent === categoryName);
+    const cartItem = cartItems.find(item => item.querySelector('h4').textContent === mealName);
 
     if (!cartItem) {
         alert('Cart item not found.');
@@ -116,7 +120,7 @@ function submitFeedback(categoryName) {
     const dateSubmitted = date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
     const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
-    feedback[categoryName] = { comment, rating, dateSubmitted };
+    feedback[mealName] = { comment, rating, dateSubmitted };
 
     localStorage.setItem(feedbackStorageKey, JSON.stringify(feedback));
 
@@ -124,7 +128,7 @@ function submitFeedback(categoryName) {
     ratingInput.value = '';
 
     alert('Feedback submitted!');
-    updateFeedbackElement(categoryName, comment, rating, dateSubmitted);
+    updateFeedbackElement(mealName, comment, rating, dateSubmitted);
 }
 
 function preFillFeedback(categoryName, cartItemDiv) {
@@ -152,5 +156,5 @@ function updateFeedbackElement(categoryName, comment, rating, dateSubmitted) {
 }
 
 window.addEventListener('load', function () {
-    displayCartItems();
+    displayCollectionItems();
 });

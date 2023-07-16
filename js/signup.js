@@ -1,3 +1,4 @@
+// signup.js file
 // Get the form element
 const form = document.querySelector('form');
 
@@ -10,9 +11,6 @@ form.addEventListener('submit', function (event) {
     const username = document.getElementById('inputUsername').value;
     const fullName = document.getElementById('inputFullName').value;
     const password = document.getElementById('inputPassword').value;
-
-
-
 
     // Create a new user object
     const newUser = {
@@ -39,8 +37,6 @@ form.addEventListener('submit', function (event) {
         return;
     }
 
-
-
     // Add the new user to the users array
     users.push(newUser);
 
@@ -52,5 +48,5 @@ form.addEventListener('submit', function (event) {
 
     // Show a success message or redirect the user to another page
     alert('User created successfully!');
-    window.location.href = "login.html"
+    window.location.href = '../../protected/login/login.html';
 });

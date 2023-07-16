@@ -1,6 +1,9 @@
-// Timeout duration in milliseconds (e.g., 5 minutes)
-const timeoutDuration = 60 * 60 * 1000; //  1 hours
+// auth.js file
+// import { logout } from "./modules/logout.mjs";
 
+
+// Timeout duration in milliseconds
+const timeoutDuration = 60 * 60 * 1000;
 let timeoutId;
 
 // Function to check if the user is logged in
@@ -16,10 +19,12 @@ function checkLogin() {
     }
 }
 
+
 // Function to handle the logout action
 function logout() {
     // Remove the isLoggedIn flag from localStorage
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('currentUser');
 
     // Redirect the user to the login page
     window.location.href = '../../protected/login/login.html';
