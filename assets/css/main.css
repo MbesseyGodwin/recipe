@@ -1650,3 +1650,39 @@ main {
 .footer .credits a {
   color: #fff;
 }
+
+
+/* collection page */
+
+/* Add these CSS styles to center the modal */
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.modal-content {
+  max-width: 600px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.collection-card:hover {
+  background-color: rgb(177, 177, 177);
+  transition: 1s;
+}

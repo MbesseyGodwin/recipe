@@ -1,13 +1,17 @@
 // collection.js file
+
+// Cache frequently accessed DOM elements
 const cartItemsDiv = document.getElementById('cartItems');
 const feedbackStorageKey = 'feedback';
 const collectionItemsStorageKey = 'collectionItems';
 
+// Retrieve collection items from local storage
 function getCollectionItems() {
     const collectionItems = JSON.parse(localStorage.getItem(collectionItemsStorageKey)) || [];
     return collectionItems;
 }
 
+// Display collection items on the page
 function displayCollectionItems() {
     cartItemsDiv.innerHTML = '';
 
@@ -19,95 +23,67 @@ function displayCollectionItems() {
 
     const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
 
-    collectionItems.forEach(item => {
+    collectionItems.forEach((item) => {
         const { categoryName, mealName, mealImage } = item;
 
         const cartItemDiv = createCartItemElement(categoryName, mealName, mealImage);
-        const { commentInput, ratingInput } = preFillFeedback(categoryName, cartItemDiv);
-
-        const itemFeedback = feedback[categoryName];
-        if (itemFeedback) {
-            const { comment, rating, dateSubmitted } = itemFeedback;
+        const feedbackItems = feedback[mealName] || [];
+        feedbackItems.forEach((feedbackItem) => {
+            const { comment, rating, dateSubmitted } = feedbackItem;
             const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
             cartItemDiv.appendChild(feedbackDiv);
-        }
+        });
+
+        const commentInput = cartItemDiv.querySelector('.comment-input');
+        const ratingInput = cartItemDiv.querySelector('.rating-input');
+        const submitButton = cartItemDiv.querySelector('.submit-button');
+        const commentButton = cartItemDiv.querySelector('.comment-button');
+
+        submitButton.addEventListener('click', () => {
+            submitFeedback(mealName, commentInput, ratingInput);
+        });
+
+        commentButton.addEventListener('click', () => {
+            openModal(feedbackItems);
+        });
 
         cartItemsDiv.appendChild(cartItemDiv);
     });
 }
 
+// Create cart item element
 function createCartItemElement(categoryName, mealName, mealImage) {
-
     const cartItemDiv = document.createElement('div');
     cartItemDiv.className = 'col-4 cart-item';
     cartItemDiv.innerHTML = `
-      <div class="p-3" data-aos="fade-up" data-aos-delay="200">
-          <div class="icon-box shadow d-flex flex-column justify-content-center align-items-center">
-              <h3>${categoryName}</h3>
-              <h4>${mealName}</h4>
-              <div class="meal-img">
-                <img class="w-50 mb-2" src="${mealImage}" alt="food">
-              </div>
-              <textarea class="comment-input form-control" placeholder="Add comment"></textarea>
-              <select class="rating-input form-control">
-                  <option value="">Select rating</option>
-                  <option value="1">1 star</option>
-                  <option value="2">2 stars</option>
-                  <option value="3">3 stars</option>
-                  <option value="4">4 stars</option>
-                  <option value="5">5 stars</option>
-              </select>
-              <button class="btn btn-primary" onclick="submitFeedback('${mealName}')">Submit</button>
-          </div>
-      </div>
-    `;
+    <div class="p-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="collection-card rounded p-2 text-center shadow d-flex flex-column justify-content-center align-items-center">
+            <h4 class="text-dark fw-bold m-0 p-0">${categoryName}</h4>
+            <p class="text-dark small mb-2 p-0">${mealName}</p>
+            <div class="meal-img">
+                <img class="w-50 mb-2 rounded" src="${mealImage}" alt="food">
+            </div>
+            <textarea class="comment-input form-control mb-2" placeholder="Add comment"></textarea>
+            <select class="rating-input form-control">
+                <option value="">Select rating</option>
+                <option value="1">1 star</option>
+                <option value="2">2 stars</option>
+                <option value="3">3 stars</option>
+                <option value="4">4 stars</option>
+                <option value="5">5 stars</option>
+            </select>
+            <div class="d-flex justify-content-between">
+                <button title="save comment" class="btn m-2 btn-danger submit-button"><i class="fa fa-check"></i></button>
+                <button title="view comment" class="btn m-2 btn-dark comment-button"><i class="fa fa-eye"></i></button>
+            </div>
+        </div>
+    </div>
+  `;
     return cartItemDiv;
 }
 
-// function createCommentsModal(categoryName) {
-//     const modal = document.createElement('div');
-//     modal.className = 'modal fade';
-//     modal.id = `commentsModal-${categoryName}`;
-//     modal.innerHTML = `
-//     <div class="modal-dialog">
-//       <div class="modal-content">
-//         <div class="modal-header">
-//           <h5 class="modal-title">${categoryName} Comments</h5>
-//           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-//             <span aria-hidden="true">&times;</span>
-//           </button>
-//         </div>
-//         <div class="modal-body">
-//           <div id="commentsList-${categoryName}"></div>
-//         </div>
-//       </div>
-//     </div>
-//   `;
-//     document.body.appendChild(modal);
-// }
-
-function createFeedbackElement(comment, rating, dateSubmitted) {
-    const feedbackDiv = document.createElement('div');
-    feedbackDiv.innerHTML = `
-    <p>Comment: ${comment}</p>
-    <p>Rating: ${rating} stars</p>
-    <p>Date: ${dateSubmitted}</p>
-  `;
-    return feedbackDiv;
-}
-
-function submitFeedback(categoryName) {
-    const cartItems = Array.from(document.querySelectorAll('.cart-item'));
-    const cartItem = cartItems.find(item => item.querySelector('h4').textContent === mealName);
-
-    if (!cartItem) {
-        alert('Cart item not found.');
-        return;
-    }
-
-    const commentInput = cartItem.querySelector('.comment-input');
-    const ratingInput = cartItem.querySelector('.rating-input');
-
+// Submit feedback for a meal
+function submitFeedback(mealName, commentInput, ratingInput) {
     const comment = commentInput.value.trim();
     const rating = ratingInput.value;
 
@@ -117,10 +93,15 @@ function submitFeedback(categoryName) {
     }
 
     const date = new Date();
-    const dateSubmitted = date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+    const dateSubmitted = date.toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    });
 
+    const feedbackItem = { comment, rating, dateSubmitted };
     const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
-    feedback[mealName] = { comment, rating, dateSubmitted };
+    feedback[mealName] = feedback[mealName] || [];
+    feedback[mealName].push(feedbackItem);
 
     localStorage.setItem(feedbackStorageKey, JSON.stringify(feedback));
 
@@ -128,33 +109,70 @@ function submitFeedback(categoryName) {
     ratingInput.value = '';
 
     alert('Feedback submitted!');
-    updateFeedbackElement(mealName, comment, rating, dateSubmitted);
+    const cartItem = commentInput.closest('.cart-item');
+    const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
+    cartItem.appendChild(feedbackDiv);
 }
 
-function preFillFeedback(categoryName, cartItemDiv) {
-    const feedback = JSON.parse(localStorage.getItem(feedbackStorageKey)) || {};
-    const itemFeedback = feedback[categoryName];
-    const commentInput = cartItemDiv.querySelector('.comment-input');
-    const ratingInput = cartItemDiv.querySelector('.rating-input');
+// Create feedback element
+function createFeedbackElement(comment, rating, dateSubmitted) {
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.className = 'feedback-item';
 
-    if (itemFeedback) {
-        commentInput.value = itemFeedback.comment;
-        ratingInput.value = itemFeedback.rating;
-    }
+    //     feedbackDiv.innerHTML = `
+    //     <div class="card m-3 p-2">
+    //         <p>Comment: ${comment}</p>
+    //         <p>Rating: ${rating} stars</p>
+    //         <p>Date: ${dateSubmitted}</p>
+    //     </div>
+    //   `;
 
-    return { commentInput, ratingInput };
+    return feedbackDiv;
 }
 
-function updateFeedbackElement(categoryName, comment, rating, dateSubmitted) {
-    const cartItems = Array.from(document.querySelectorAll('.cart-item'));
-    const cartItem = cartItems.find(item => item.querySelector('h3').textContent === categoryName);
+// Open modal to display comments
+function openModal(feedbackItems) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Comments</h2>
+        <div class="comments-container">
+            ${feedbackItems.map((feedbackItem) => createCommentElement(feedbackItem)).join('')}
+        </div>
+    </div>
+  `;
 
-    if (cartItem) {
-        const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
-        cartItem.appendChild(feedbackDiv);
-    }
+    const closeButton = modal.querySelector('.close-button');
+    closeButton.addEventListener('click', () => {
+        closeModal(modal);
+    });
+
+    document.body.appendChild(modal);
 }
 
+// Create comment element
+function createCommentElement(feedbackItem) {
+    const { comment, rating, dateSubmitted } = feedbackItem;
+    return `
+    <div class="comment-item">
+        <div class="card p-2">
+            <p>Comment: ${comment}</p>
+            <p>Rating: ${rating} stars</p>
+            <p>Date: ${dateSubmitted}</p>
+        </div>
+    </div>
+  `;
+}
+
+
+// Close modal
+function closeModal(modal) {
+    modal.remove();
+}
+
+// Event listener when the page loads
 window.addEventListener('load', function () {
     displayCollectionItems();
 });

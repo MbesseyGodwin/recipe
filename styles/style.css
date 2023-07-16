@@ -7,6 +7,8 @@
 }
 
 :root {
+    --dark: #000000;
+    --dark-danger: #f50606;
     --tenne-tawny: #d65108;
     --tenne-tawny-dark: #b54507;
 }
@@ -120,7 +122,7 @@ body {
 }
 
 .meal-name {
-    padding: 1.5rem 0.5rem;
+    padding: 0.5rem;
 }
 
 .meal-name h3 {
@@ -130,7 +132,7 @@ body {
 .recipe-btn {
     text-decoration: none;
     color: #fff;
-    background: var(--tenne-tawny);
+    background: var(--dark);
     font-weight: 500;
     font-size: 1.1rem;
     padding: 0.75rem 0;
@@ -150,7 +152,10 @@ body {
 }
 
 .recipe-btn:hover {
-    background: var(--tenne-tawny-dark);
+    background: var(--dark-danger);
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 /* meal details */

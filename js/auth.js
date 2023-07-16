@@ -1,9 +1,9 @@
 // auth.js file
 // import { logout } from "./modules/logout.mjs";
 
+// Timeout duration in 5 minutes
+const timeoutDuration = 5 * 60 * 1000;
 
-// Timeout duration in milliseconds
-const timeoutDuration = 60 * 60 * 1000;
 let timeoutId;
 
 // Function to check if the user is logged in
@@ -18,7 +18,6 @@ function checkLogin() {
         startInactivityTimer();
     }
 }
-
 
 // Function to handle the logout action
 function logout() {
