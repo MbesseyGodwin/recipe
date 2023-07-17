@@ -30,25 +30,81 @@ function displayUserProfile() {
     const currentUser = getCurrentUser();
 
     if (currentUser) {
-        // Get the HTML elements to display user information
         const nameElement = document.getElementById('profile-fullname');
         const emailElement = document.getElementById('profile-email');
         const usernameElement = document.getElementById('profile-username');
         const loginTimeElement = document.getElementById('login-time');
-
-        // Get the form input elements
         const nameInput = document.getElementById('inputFullName');
         const usernameInput = document.getElementById('inputUsername');
 
-        // Display user information in the HTML elements
         nameElement.textContent = currentUser.fullName;
         emailElement.textContent = currentUser.email;
         usernameElement.textContent = currentUser.username;
         loginTimeElement.textContent = currentUser.loginTime;
 
-        // Set the input values
         nameInput.value = currentUser.fullName;
         usernameInput.value = currentUser.username;
+    }
+}
+
+// Function to open the profile modal
+function openProfileModal() {
+    const currentUser = getCurrentUser();
+
+    if (currentUser) {
+        const modalElement = document.createElement('div');
+        modalElement.classList.add('modal');
+        modalElement.id = 'exampleModal';
+        modalElement.tabIndex = '-1';
+        modalElement.setAttribute('aria-labelledby', 'exampleModalLabel');
+        modalElement.setAttribute('aria-hidden', 'true');
+
+        const fullName = currentUser.fullName;
+        const username = currentUser.username;
+
+        modalElement.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content" style="margin-top: 150px;">
+            <form id="profileForm">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit profile</h5>
+                <button type="button" class="btn btn-dark btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="container">
+                  <div class="mb-3 row">
+                    <label for="inputFullName" class="col-3 col-form-label">Full Name</label>
+                    <div class="col-9">
+                      <input type="text" class="form-control shadow-none border border-dark" id="inputFullName"
+                        placeholder="Full Name" value="${fullName}" required>
+                    </div>
+                  </div>
+  
+                  <div class="mb-3 row">
+                    <label for="inputUsername" class="col-3 col-form-label">User Name</label>
+                    <div class="col-9">
+                      <input type="text" class="form-control shadow-none border border-dark" id="inputUsername"
+                        placeholder="Username" value="${username}" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+        document.body.appendChild(modalElement);
+
+        const bootstrapModal = new bootstrap.Modal(modalElement);
+        bootstrapModal.show();
+
+        const profileForm = document.getElementById('profileForm');
+        profileForm.addEventListener('submit', handleProfileUpdate);
     }
 }
 
@@ -56,42 +112,32 @@ function displayUserProfile() {
 function handleProfileUpdate(event) {
     event.preventDefault();
 
-    // Get the updated values from the form fields
     const newName = document.getElementById('inputFullName').value;
     const newUsername = document.getElementById('inputUsername').value;
 
-    // Get the current user from localStorage
     const currentUser = getCurrentUser();
     const users = getUsers();
 
     if (currentUser) {
-        // Find the index of the current user in the users array
         const index = users.findIndex((user) => user.email === currentUser.email);
 
         if (index !== -1) {
-            // Update the profile information in the currentUser object
             currentUser.fullName = newName;
             currentUser.username = newUsername;
 
-            // Update the corresponding user's data in the users array
             users[index] = currentUser;
-
-            // Save the updated users array to localStorage
             saveUsers(users);
 
-            // Update the currentUser in localStorage
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-            // Display the updated profile information
             displayUserProfile();
 
-            // Show a success message to the user
             alert('Profile updated successfully!');
+            window.location.reload();
 
-            // Close the modal
-            const modalElement = document.getElementById('exampleModal');
-            const bootstrapModal = bootstrap.Modal.getInstance(modalElement);
-            bootstrapModal.hide();
+            // const modalElement = document.getElementById('exampleModal');
+            // const bootstrapModal = bootstrap.Modal.getInstance(modalElement);
+            // bootstrapModal.hide();
         }
     }
 }
@@ -99,6 +145,6 @@ function handleProfileUpdate(event) {
 // Call the displayUserProfile function on page load
 window.addEventListener('DOMContentLoaded', displayUserProfile);
 
-// Add an event listener to the profile update form
-const profileForm = document.getElementById('exampleModal').querySelector('form');
-profileForm.addEventListener('submit', handleProfileUpdate);
+// Add an event listener to the Edit Profile button to open the modal
+const editProfileBtn = document.getElementById('editProfileBtn');
+editProfileBtn.addEventListener('click', openProfileModal);
