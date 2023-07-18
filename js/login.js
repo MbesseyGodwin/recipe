@@ -46,4 +46,6 @@ function loginUser(email, password) {
 
 // Add an event listener to the form submit event
 var loginForm = document.getElementById('loginForm');
-loginForm.addEventListener('submit', handleFormSubmit);
+if (loginForm) {
+    loginForm.addEventListener('submit', handleFormSubmit);
+}

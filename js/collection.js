@@ -1,4 +1,5 @@
 // collection.js file
+import { showAlert } from "./modules/showAlert.mjs";
 
 // Cache frequently accessed DOM elements
 const cartItemsDiv = document.getElementById('cartItems');
@@ -63,8 +64,8 @@ function createCartItemElement(categoryName, mealName, mealImage) {
             <div class="meal-img">
                 <img class="w-50 mb-2 rounded" src="${mealImage}" alt="food">
             </div>
-            <textarea class="comment-input form-control mb-2" placeholder="Add comment"></textarea>
-            <select class="rating-input form-control">
+            <textarea class="comment-input form-control mb-2 shadow-none" placeholder="Add comment"></textarea>
+            <select class="rating-input form-control shadow-none">
                 <option value="">Select rating</option>
                 <option value="1">1 star</option>
                 <option value="2">2 stars</option>
@@ -88,7 +89,7 @@ function submitFeedback(mealName, commentInput, ratingInput) {
     const rating = ratingInput.value;
 
     if (comment === '' || rating === '') {
-        alert('Please provide a comment and rating.');
+        showAlert('Please provide a comment and rating.');
         return;
     }
 
@@ -108,7 +109,7 @@ function submitFeedback(mealName, commentInput, ratingInput) {
     commentInput.value = '';
     ratingInput.value = '';
 
-    alert('Feedback submitted!');
+    showAlert('Feedback submitted!');
     const cartItem = commentInput.closest('.cart-item');
     const feedbackDiv = createFeedbackElement(comment, rating, dateSubmitted);
     cartItem.appendChild(feedbackDiv);
