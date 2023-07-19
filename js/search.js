@@ -39,7 +39,7 @@ async function fetchData(url) {
     }
   } catch (error) {
     console.error('Error:', error);
-    outputDiv.textContent = 'An error occurred while fetching data.';
+    outputDiv.textContent = 'Meal was not fetched, kindly enter a letter.';
   }
 }
 
