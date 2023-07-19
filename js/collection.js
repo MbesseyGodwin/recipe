@@ -58,7 +58,7 @@ function createCartItemElement(categoryName, mealName, mealImage) {
     cartItemDiv.className = 'col-4 cart-item';
     cartItemDiv.innerHTML = `
     <div class="p-3" data-aos="fade-up" data-aos-delay="100">
-        <div class="collection-card rounded p-2 text-center shadow d-flex flex-column justify-content-center align-items-center">
+        <div class="collection-card rounded p-2 text-center shadow-lg d-flex flex-column justify-content-center align-items-center">
             <h4 class="text-dark fw-bold m-0 p-0">${categoryName}</h4>
             <p class="text-dark small mb-2 p-0">${mealName}</p>
             <div class="meal-img">
